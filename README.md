@@ -1,87 +1,84 @@
 # AI Knowledge Workspace
 
-> A multi-tenant RAG knowledge platform built with React, NestJS, PostgreSQL, Redis and MinIO.
->
-> 企业级多租户 AI 知识库与智能问答平台：覆盖权限管理、文档处理、混合检索、流式问答与引用追踪的完整业务闭环。
+[English](README.md) | [简体中文](README.zh-CN.md)
 
-## English overview
+> A multi-tenant RAG knowledge platform built with React, NestJS, PostgreSQL, Redis, MinIO, and a local reranker.
 
-AI Knowledge Workspace is a portfolio project that demonstrates end-to-end delivery of a realistic B2B AI product rather than a standalone chat demo. It models platform, organization and department scopes; processes PDF, DOCX and Markdown documents asynchronously; retrieves published knowledge through vector and BM25 search; and streams grounded answers with citations to the browser.
+**Current version: v1.0.0**
 
-The project is positioned as a **frontend-focused full-stack implementation**. Its strongest areas are React application architecture, role-aware product flows, API integration and the complete RAG user journey. The backend is implemented with NestJS and Prisma, but this repository does not claim large-scale production traffic, distributed architecture or enterprise operations that have not been proven.
+AI Knowledge Workspace is an end-to-end implementation of a realistic B2B AI knowledge product rather than a standalone chat demo. It models platform, organization, and department scopes; processes enterprise documents asynchronously; retrieves published knowledge through hybrid search; and streams grounded answers with traceable citations.
 
-### Highlights
+The project is positioned as a **frontend-focused full-stack implementation**. Its strongest areas are React application architecture, role-aware product workflows, API integration, and the complete RAG user journey. The backend is implemented with NestJS and Prisma, without claiming production scale or distributed-system capabilities that have not been proven.
 
-- Role-aware React workspace for platform, organization, department admin and member workflows.
-- Route-level and API-level authorization, not only hidden navigation items.
-- PDF, DOCX and Markdown upload, asynchronous processing, review, publishing, retry, download and archive flows.
-- Parent-section/child-chunk indexing with 1,024-dimensional embeddings.
-- Hybrid retrieval with vector search, BM25, reciprocal rank fusion, optional reranking and controlled fallbacks.
-- SSE streaming responses with citations, retrieval states, feedback and trace diagnostics.
-- Chinese/English UI, centralized API feedback and responsive administration pages.
+## Highlights
 
-## 中文说明
+- Multi-tenant workspaces for platform, organization, and department scopes.
+- Role-aware navigation, protected frontend routes, and backend resource authorization.
+- Organization administrators can create employees and assign multiple department roles.
+- Department administrators can manage members and knowledge bases while retaining normal chat access.
+- PDF, DOCX, and Markdown upload with asynchronous parsing, review, publishing, retry, download, and archive workflows.
+- Parent-section and child-chunk indexing with 1,024-dimensional embeddings.
+- Hybrid vector and BM25 retrieval, reciprocal rank fusion, optional reranking, and controlled fallbacks.
+- SSE-streamed answers with citations, retrieval states, feedback, and trace diagnostics.
+- Markdown, code blocks, math, links, and constrained images in AI answers and source/chunk previews.
+- Chinese and English user interfaces.
 
-AI Knowledge Workspace 的目标不是做一个“套壳聊天页面”，而是还原企业知识从进入系统到被可靠使用的完整流程：
+## Product Flow
 
 ```text
-组织 / 部门 / 角色权限
-        ↓
-上传并异步处理业务文档
-        ↓
-审核、发布可检索内容
-        ↓
-Vector + BM25 混合召回
-        ↓
-Reranker / 阈值 / 状态机
-        ↓
-SSE 流式回答 + Citation + 反馈追踪
+Organization / Department / Role authorization
+                         ↓
+        Upload and process enterprise documents
+                         ↓
+             Review and publish knowledge
+                         ↓
+          Vector + BM25 hybrid retrieval
+                         ↓
+          Reranker + thresholds + state machine
+                         ↓
+        SSE answer + citations + feedback trace
 ```
 
-它适合作为 React / TypeScript 前端岗位，以及前端背景全栈岗位的作品集项目。项目重点展示复杂后台产品建模、前后端接口协作、权限边界、异步任务和 RAG 用户体验，不把尚未验证的高并发、微服务或生产规模包装成既有成果。
+## Roles and Access
 
-## 核心功能
+| Role | Scope | Main capabilities |
+| --- | --- | --- |
+| Platform Admin | Platform | Dashboard, organization creation and management, platform statistics |
+| Organization Admin | Organization | Department management, employee management, department role assignment |
+| Department Admin | Department | Members, knowledge bases, documents, chunks, review, publishing, retrieval diagnostics, and chat |
+| Department Member | Department | Read-only knowledge access, knowledge-base chat, conversations, and feedback |
 
-### 多租户与权限
+Authorization is enforced at three levels:
 
-| 角色               | 作用域 | 已实现能力                                      |
-| ------------------ | ------ | ----------------------------------------------- |
-| Platform Admin     | 平台   | Dashboard、租户创建/编辑/启用/禁用、平台统计    |
-| Organization Admin | 组织   | 部门管理、租户员工管理、部门管理员分配          |
-| Department Admin   | 部门   | 成员、知识库、文档、Chunk、审核、发布、检索诊断 |
-| Department Member  | 部门   | 只读知识库、知识库内 AI Chat、会话与反馈        |
+1. Role-aware navigation.
+2. React Router protection against direct URL access.
+3. NestJS guards and resource ownership checks at the API layer.
 
-权限同时落在三层：
-
-1. 左侧导航按固定角色显示。
-2. React Router 保护直接 URL 访问。
-3. NestJS Guard 和资源归属校验保护真实数据边界。
-
-### 文档工作流
+## Document Workflow
 
 ```text
 UPLOAD → PROCESSING → PARSED → REVIEWING → PUBLISHED
                  └──────────→ FAILED → REPROCESS
 ```
 
-- 支持 PDF、DOCX、Markdown。
-- 原文件写入 MinIO，BullMQ 负责异步处理任务。
-- 解析后生成 Parent Section 与 Child Chunk，并写入 Embedding。
-- 管理员可以预览、编辑 Chunk、审核和发布。
-- 失败文档可以重试；原文件可以下载；归档采用业务状态而非物理删除。
+- Original files are stored in MinIO.
+- BullMQ and Redis run asynchronous document-processing jobs.
+- Parsed content is split into parent sections and child chunks, then embedded.
+- Administrators can preview, edit, review, and publish chunks.
+- Failed documents can be retried, source files can be downloaded, and archive operations retain business history.
 
-### RAG 与 AI Chat
+## RAG and AI Chat
 
-- Query Rewrite 结合当前问题与有限会话历史生成语义、关键词、纠错和别名查询。
-- Vector 与 BM25 两路并行召回，单路失败时允许降级。
-- 候选结果通过 RRF 合并，精确实体保护后进入可选 Reranker。
-- 命中 Child Chunk 后按 Parent Section 重建连续上下文，避免跨章节拼接。
-- 只有 `PUBLISHED` 且有效的 Chunk 参与新检索。
-- `grounded` / `partial` 才调用生成模型；无数据、无匹配或服务异常不会伪造答案。
-- 浏览器通过 `text/event-stream` 接收增量回答、引用、状态和结束事件。
-- Conversation 永久绑定一个知识库，切换知识库会开始空白会话，不复用历史。
+- Query rewriting combines the current question with limited conversation history to generate semantic and keyword queries.
+- Vector and BM25 retrieval run independently and can degrade gracefully if one path fails.
+- Reciprocal rank fusion merges candidates before optional cross-encoder reranking.
+- Child-chunk hits are expanded through their parent sections to preserve coherent context.
+- Only valid, published chunks participate in new retrieval.
+- The generation model is called only for grounded or partial states; missing evidence and service failures are not presented as fabricated answers.
+- The browser receives incremental content, citations, retrieval state, and completion events through `text/event-stream`.
+- Every conversation is bound to one knowledge base. Switching knowledge bases starts a blank conversation and does not reuse history.
 
-## 系统架构
+## Architecture
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
@@ -94,77 +91,74 @@ UPLOAD → PROCESSING → PARSED → REVIEWING → PUBLISHED
 │ DTO Validation / JWT / RBAC Guards / Services / OpenAPI     │
 ├──────────────┬────────────────┬───────────────┬──────────────┤
 │ Prisma ORM   │ BullMQ         │ MinIO         │ AI Providers │
-│ ParadeDB     │ Redis          │ Object files  │ Ollama / LLM │
+│ ParadeDB     │ Redis          │ Object files  │ LLM / Embed  │
 │ pgvector     │ async jobs     │               │ Reranker     │
 └──────────────┴────────────────┴───────────────┴──────────────┘
 ```
 
-## 技术栈
+## Technology Stack
 
-| 层级                 | 技术                                                                     |
-| -------------------- | ------------------------------------------------------------------------ |
-| Frontend             | React 19、TypeScript、Vite 8、React Router、Zustand、Axios               |
-| UI                   | HeroUI、Tailwind CSS 4、Framer Motion、Lucide、React Markdown、KaTeX     |
-| Form & Validation    | React Hook Form、Zod                                                     |
-| Internationalization | i18next、react-i18next                                                   |
-| Backend              | Node.js、NestJS 11、REST、SSE、class-validator、Swagger / Scalar         |
-| Auth & Authorization | JWT Access Token、HttpOnly Refresh Cookie、Redis Session、RBAC Guard     |
-| Database             | PostgreSQL / ParadeDB、Prisma 7、pgvector、`pg_search` BM25              |
-| Async & Storage      | BullMQ、Redis、MinIO                                                     |
-| RAG                  | Ollama Embedding、Vector Search、BM25、RRF、Reranker、Citation、RagTrace |
-| Quality              | Vitest、Testing Library、Playwright、Jest、Supertest、ESLint、Prettier   |
-| Local infrastructure | Docker Compose                                                           |
+| Layer | Technology |
+| --- | --- |
+| Frontend | React 19, TypeScript, Vite 8, React Router, Zustand, Axios |
+| UI | HeroUI, Tailwind CSS 4, Framer Motion, Lucide, React Markdown, KaTeX |
+| Forms and validation | React Hook Form, Zod |
+| Internationalization | i18next, react-i18next |
+| Backend | Node.js, NestJS 11, REST, SSE, class-validator, Swagger / Scalar |
+| Authentication | JWT access token, HttpOnly refresh cookie, Redis session, RBAC guards |
+| Database and search | PostgreSQL / ParadeDB, Prisma 7, pgvector, `pg_search` BM25 |
+| Jobs and storage | BullMQ, Redis, MinIO |
+| RAG | Ollama embeddings, vector search, BM25, RRF, Qwen reranker, citations, RAG traces |
+| Quality | Vitest, Testing Library, Playwright, Jest, Supertest, ESLint, Prettier |
+| Local infrastructure | Docker Compose |
 
-## 仓库结构
+## Repository Structure
 
 ```text
 ai-workspace/
-├── frontend/              # React SPA、路由、页面、API Client、前端测试
-├── backend/               # NestJS API、Prisma、RAG、任务队列、后端测试
-├── docker/                # 本地 ParadeDB/PostgreSQL、Redis、MinIO
-├── docs/                  # 产品、API、RAG、部署与面试文档
-└── scripts/               # 仓库级校验脚本
+├── frontend/       # React SPA, routes, pages, API client, and frontend tests
+├── backend/        # NestJS API, Prisma schema, RAG pipeline, queues, and tests
+├── reranker/       # Local Qwen reranker service
+├── docker/         # ParadeDB/PostgreSQL, Redis, and MinIO for local development
+└── docs/           # API, RAG, deployment, roadmap, and interview documentation
 ```
 
-## 快速开始
+## Quick Start
 
-### 1. 环境要求
+### Prerequisites
 
-- Node.js `^22.22.2`、`^24.15.0` 或 `>=26.0.0`；推荐 Node.js 24 LTS。
-- pnpm 10。
-- Docker 与 Docker Compose。
-- 本地 Ollama，用于 1,024 维 Embedding。
-- DeepSeek API Key，用于 Query Rewrite 和回答生成。
+- Node.js `^22.22.2`, `^24.15.0`, or `>=26.0.0`; Node.js 24 LTS is recommended.
+- pnpm 10.
+- Docker and Docker Compose.
+- A local Ollama instance for 1,024-dimensional embeddings.
+- A DeepSeek API key for query rewriting and answer generation.
+- Python 3 for the optional reranker service.
 
-Reranker 服务是可选增强项。未启动时，当前检索实现会在已有 Vector/BM25 证据上降级，但会失去交叉编码器重排能力。
-
-### 2. 启动基础服务
+### 1. Start the infrastructure
 
 ```bash
 cd docker
 docker compose up -d postgres-search redis minio
 ```
 
-默认端口：
+| Service | Default address |
+| --- | --- |
+| ParadeDB / PostgreSQL | `localhost:5435` |
+| Redis | `localhost:6379` |
+| MinIO API | `localhost:9000` |
+| MinIO Console | `http://localhost:9001` |
 
-| 服务                  | 地址                    |
-| --------------------- | ----------------------- |
-| ParadeDB / PostgreSQL | `localhost:5435`        |
-| Redis                 | `localhost:6379`        |
-| MinIO API             | `localhost:9000`        |
-| MinIO Console         | `http://localhost:9001` |
+The full BM25 migration requires the `pg_search` extension supplied by `postgres-search`, so the project uses port `5435` by default.
 
-`postgres` 服务是普通 pgvector PostgreSQL；完整 BM25 迁移需要 `postgres-search` 提供的 `pg_search` 扩展，因此本项目默认连接 `5435`。
-
-### 3. 准备 Embedding 模型
+### 2. Prepare the embedding model
 
 ```bash
 ollama pull qwen3-embedding:0.6b
 ```
 
-确保 Ollama 运行在 `http://127.0.0.1:11434`。
+Make sure Ollama is available at `http://127.0.0.1:11434`.
 
-### 4. 配置并初始化后端
+### 3. Configure and start the backend
 
 ```bash
 cd backend
@@ -176,42 +170,38 @@ pnpm exec prisma db seed
 pnpm start:dev
 ```
 
-编辑 `backend/.env`，至少替换：
+At minimum, replace `DEEPSEEK_API_KEY`, `JWT_SECRET`, and `JWT_REFRESH_SECRET` in `backend/.env`.
 
-- `DEEPSEEK_API_KEY`
-- `JWT_SECRET`
-- `JWT_REFRESH_SECRET`
+- API: `http://localhost:3000`
+- Scalar API reference: `http://localhost:3000/docs`
+- OpenAPI JSON: `http://localhost:3000/openapi.json`
 
-后端启动后：
-
-- API：`http://localhost:3000`
-- Scalar API Reference：`http://localhost:3000/docs`
-- OpenAPI JSON：`http://localhost:3000/openapi.json`
-
-### 5. 启动前端
+### 4. Start the frontend
 
 ```bash
 cd frontend
+cp .env.example .env
 pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-浏览器访问 `http://localhost:5173`。
+Open `http://localhost:5173`.
 
-### 6. 本地开发账号
+### 5. Start the optional reranker
 
-本地 Seed 密码由 `SEED_ADMIN_PASSWORD` 控制，未配置时为 `123456`。这些账号仅用于本地开发，生产环境禁止使用默认密码。
+The reranker improves candidate ordering. The retrieval pipeline can fall back to vector/BM25 evidence when it is unavailable.
 
-| 账号               | 邮箱     | 固定角色         |
-| ------------------ | -------- | ---------------- |
-| `en-d-admin@x.com` | `123456` | Department Admin |
-| `x-d@x.com`        | `123456` | Department Admin |
+```bash
+cd reranker
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app:app --host 127.0.0.1 --port 8010
+```
 
-** 想要加账户只能用租户管理员登录加成员 **
+The first model load may download `Qwen/Qwen3-Reranker-0.6B`. Existing Hugging Face cache data is reused automatically.
 
-> `derparment` 是当前 V1 Seed 中保留的开发账号拼写。公开演示前可单独安排数据迁移后更名，不应直接修改 ID 或破坏已有关联数据。
-
-## 常用命令
+## Common Commands
 
 ```bash
 # Backend
@@ -231,13 +221,17 @@ pnpm test
 pnpm test:e2e
 ```
 
-RAG 评测结果只代表仓库内 V1 评测集和当时使用的数据、模型及阈值，不应解释为对未来所有文档永久达到相同指标。详见 [RAG 实施说明](docs/RAG.md)。
+RAG evaluation results apply only to the repository's V1 evaluation set and the data, models, and thresholds used at that time. See [RAG implementation notes](docs/RAG.md).
 
-## 设计取舍与边界
+## V1.0.0 Scope and Boundaries
 
-- 当前使用模块化单体，而不是为了作品集强行拆微服务。
-- 同一业务库承载事务数据、pgvector 和 BM25，减少额外 ETL 与一致性成本。
-- 文档处理使用队列隔离耗时任务，但尚未完成生产级死信队列、任务监控和多 Worker 压测。
-- Refresh Token 使用 HttpOnly Cookie，Access Token 由前端内存状态管理；生产部署应使用 HTTPS 和同站域名策略。
-- 当前完整部署仍有环境化改造门禁，不能直接把本地 Compose 描述为生产方案。
-- V1 不包含 Billing、Subscription、SSO、SCIM、Agent、Tool Calling、Kafka、Kubernetes 和多知识库联合检索。
+- The project uses a modular monolith rather than artificial microservices.
+- Transaction data, pgvector, and BM25 share one database to reduce ETL and consistency overhead.
+- Queue workers isolate slow document-processing tasks, but production-grade dead-letter queues, worker observability, and multi-worker load testing remain future work.
+- Refresh tokens use HttpOnly cookies, while access tokens are held in frontend memory. Production deployment should use HTTPS and a same-site domain strategy.
+- Local Docker Compose is a development environment, not a claim of production readiness.
+- V1.0.0 does not include billing, subscriptions, SSO, SCIM, agents, tool calling, Kafka, Kubernetes, or cross-knowledge-base retrieval.
+
+## Roadmap
+
+V2 is planned. See [docs/plan-v2.md](docs/plan-v2.md) for the current direction.
