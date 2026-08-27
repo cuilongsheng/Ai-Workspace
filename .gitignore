@@ -1,0 +1,48 @@
+# macOS and editors
+.DS_Store
+.idea/
+.vscode/
+
+# Local agent/tool state
+.agent/
+.codex/
+.pnpm-store/
+.tools/
+
+# Dependencies and generated output
+**/node_modules/
+**/dist/
+**/coverage/
+*.tsbuildinfo
+
+# Python environments and generated caches
+**/.venv/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Environment variables and local credentials
+**/.env
+**/.env.*
+!**/.env.example
+backend/cookie.txt
+
+# Test artifacts
+frontend/playwright-report/
+frontend/test-results/
+
+# Local infrastructure data and database exports
+docker/minio/data/
+docker/*.dump
+docker/*.sql
+
+# Private planning and scratch documents
+tmpdocs/
+
+# Logs and temporary files
+*.log
+*.pid
+*.tmp
+*.swp
+tmpdocs/
+docs/

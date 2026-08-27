@@ -1,0 +1,54 @@
+enum OrganizationStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum MembershipStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+}
+
+model Organization {
+  id             String             @id @default(cuid())
+  name           String
+  status         OrganizationStatus @default(ACTIVE)
+  users          User[]
+  departments    Department[]
+  roles          Role[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  knowledgeBases KnowledgeBase[]
+  documents      Document[]
+  conversations  Conversation[]
+}
+
+model Department {
+  id             String          @id @default(cuid())
+  name           String
+  nameEn         String?
+  organizationId String
+  organization   Organization    @relation(fields: [organizationId], references: [id])
+  memberships    Membership[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  knowledgeBases KnowledgeBase[]
+  documents      Document[]
+  conversations  Conversation[]
+
+  @@unique([organizationId, name])
+}
+
+model Membership {
+  id           String           @id @default(cuid())
+  userId       String
+  departmentId String
+  user         User             @relation(fields: [userId], references: [id])
+  department   Department       @relation(fields: [departmentId], references: [id])
+  roles        MembershipRole[]
+  status       MembershipStatus @default(ACTIVE)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@unique([userId, departmentId])
+}

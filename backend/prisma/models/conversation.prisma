@@ -1,0 +1,124 @@
+model Conversation {
+  id String @id @default(cuid())
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+
+  knowledgeBaseId String
+  knowledgeBase   KnowledgeBase @relation(fields: [knowledgeBaseId], references: [id], onDelete: Restrict)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  title String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages Message[]
+
+  @@index([organizationId, departmentId, userId, updatedAt])
+  @@index([knowledgeBaseId, userId, updatedAt])
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+}
+
+enum MessageStatus {
+  PENDING
+  STREAMING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model Message {
+  id String @id @default(cuid())
+
+  conversationId String
+
+  role   MessageRole
+  status MessageStatus @default(COMPLETED)
+
+  content String
+
+  model String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  citations MessageCitation[]
+  ragTrace  RagTrace?
+  feedback  MessageFeedback[]
+
+  @@index([conversationId, createdAt])
+}
+
+model RagTrace {
+  id String @id @default(cuid())
+
+  messageId String  @unique
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  status      String
+  diagnostics Json
+  createdAt   DateTime @default(now())
+
+  @@index([status, createdAt])
+}
+
+model MessageFeedback {
+  id String @id @default(cuid())
+
+  messageId String
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  helpful Boolean
+  reason  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([messageId, userId])
+  @@index([helpful, createdAt])
+}
+
+model MessageCitation {
+  id String @id @default(cuid())
+
+  messageId String
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Restrict)
+
+  documentChunkId String
+  documentChunk   DocumentChunk @relation(fields: [documentChunkId], references: [id], onDelete: Restrict)
+
+  sourceNumber Int
+
+  // Citation snapshots: document names and chunk content may change after generation.
+  documentName String
+  chunkIndex   Int
+  quote        String
+
+  // Query-specific ranking signals used to explain the historical citation.
+  similarity     Float
+  retrievalScore Float
+  rerankScore    Float?
+
+  createdAt DateTime @default(now())
+
+  @@unique([messageId, sourceNumber])
+  @@index([documentId])
+  @@index([documentChunkId])
+}

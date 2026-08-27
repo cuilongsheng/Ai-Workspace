@@ -1,0 +1,77 @@
+model Role {
+  id              String           @id @default(cuid())
+  name            String
+  organizationId  String
+  organization    Organization     @relation(fields: [organizationId], references: [id])
+  membershipRoles MembershipRole[]
+  permissions     RolePermission[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@unique([organizationId, name])
+}
+
+model Permission {
+  id            String                   @id @default(cuid())
+  code          String                   @unique
+  name          String
+  roles         RolePermission[]
+  platformRoles PlatformRolePermission[]
+  description   String?
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+}
+
+enum PlatformRoleCode {
+  PLATFORM_ADMIN
+}
+
+model PlatformRole {
+  id          String                   @id @default(cuid())
+  code        PlatformRoleCode         @unique
+  assignments PlatformRoleAssignment[]
+  permissions PlatformRolePermission[]
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+}
+
+model PlatformRoleAssignment {
+  userId    String
+  roleId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      PlatformRole @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  createdAt DateTime     @default(now())
+
+  @@id([userId, roleId])
+  @@index([roleId])
+}
+
+model PlatformRolePermission {
+  roleId       String
+  permissionId String
+  role         PlatformRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission   @relation(fields: [permissionId], references: [id], onDelete: Restrict)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([roleId, permissionId])
+}
+
+model MembershipRole {
+  membershipId String
+  roleId       String
+  membership   Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  createdAt    DateTime   @default(now())
+
+  @@id([membershipId, roleId])
+  @@index([roleId])
+}

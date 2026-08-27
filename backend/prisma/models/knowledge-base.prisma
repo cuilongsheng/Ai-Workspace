@@ -1,0 +1,33 @@
+enum KnowledgeBaseStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+model KnowledgeBase {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  documents     Document[]
+  conversations Conversation[]
+
+  starterQuestions Json @default("[]")
+
+  status KnowledgeBaseStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([departmentId, name])
+  @@index([organizationId, status])
+  @@index([departmentId, status])
+}

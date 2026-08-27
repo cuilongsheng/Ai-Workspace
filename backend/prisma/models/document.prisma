@@ -1,0 +1,80 @@
+enum DocumentStatus {
+  UPLOADING
+  PROCESSING
+  PARSED
+  REVIEWING
+  PUBLISHED
+  FAILED
+  ARCHIVED
+}
+
+model Document {
+  id   String @id @default(cuid())
+  name String
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  knowledgeBaseId String
+  knowledgeBase   KnowledgeBase @relation(fields: [knowledgeBaseId], references: [id], onDelete: Restrict)
+
+  status      DocumentStatus @default(UPLOADING)
+  description String?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  originalName String
+  storageKey   String @unique
+  mimeType     String
+  size         Int
+
+  extractedText String?
+
+  processes DocumentProcess[]
+
+  chunks    DocumentChunk[]
+  citations MessageCitation[]
+
+  @@unique([knowledgeBaseId, name], map: "Document_active_knowledgeBaseId_name_key", where: { status: { not: "ARCHIVED" } })
+  @@index([knowledgeBaseId, status])
+}
+
+enum ProcessStatus {
+  PENDING
+
+  PROCESSING
+
+  SUCCESS
+
+  FAILED
+}
+
+model DocumentProcess {
+  id String @id @default(cuid())
+
+  documentId String
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  status ProcessStatus @default(PENDING)
+
+  errorMessage String?
+
+  startedAt DateTime?
+
+  finishedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@index([documentId])
+}

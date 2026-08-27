@@ -1,0 +1,39 @@
+model DocumentChunk {
+  id String @id @default(cuid())
+
+  documentId String
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  citations MessageCitation[]
+
+  organizationId  String
+  departmentId    String
+  knowledgeBaseId String
+
+  chunkIndex Int
+  sectionIndex Int @default(0)
+  sectionTitle String?
+  chunkInSection Int @default(0)
+  content    String
+  charCount  Int
+  tokenCount Int?
+
+  // Old rows remain for historical citations but never participate in RAG.
+  isActive    Boolean @default(true)
+  indexVersion Int @default(1)
+
+  metadata Json?
+
+  embeddingModel String?
+  embedding      Unsupported("vector(1024)")?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([documentId, chunkIndex])
+  @@index([documentId])
+  @@index([documentId, isActive, sectionIndex, chunkInSection])
+  @@index([knowledgeBaseId])
+  @@index([departmentId])
+}

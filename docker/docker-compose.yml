@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: pgvector/pgvector:0.8.5-pg17
+    container_name: ai-workspace-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ai_workspace
+    ports:
+      - "5434:5432"
+    volumes:
+      - ai_workspace_postgres_data:/var/lib/postgresql/data
+  postgres-search:
+    image: paradedb/paradedb:latest
+    container_name: ai-workspace-search-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ai_workspace
+    ports:
+      - "5435:5432"
+    volumes:
+      - ai_workspace_search_postgres_data:/var/lib/postgresql/
+
+  redis:
+    image: redis:8
+    container_name: ai-workspace-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - ai_workspace_redis_data:/data
+    
+  minio:
+    image: minio/minio:latest
+    container_name: ai-workspace-minio
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    volumes:
+      - ./minio/data:/data
+    command:
+      server /data --console-address ":9001"
+
+
+volumes:
+  ai_workspace_postgres_data:
+  ai_workspace_search_postgres_data:
+  ai_workspace_redis_data:
+  ai_workspace_minio_data:

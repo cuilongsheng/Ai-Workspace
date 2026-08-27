@@ -1,0 +1,30 @@
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  LOCKED
+}
+
+enum OrganizationRoleCode {
+  ORGANIZATION_ADMIN
+}
+
+model User {
+  id                      String                   @id @default(cuid())
+  organizationId          String?
+  organization            Organization?            @relation(fields: [organizationId], references: [id])
+  organizationRole        OrganizationRoleCode?
+  email                   String                   @unique
+  passwordHash            String
+  username                String?
+  status                  UserStatus               @default(ACTIVE)
+  memberships             Membership[] // 一个 User 有多个 Membership
+  platformRoleAssignments PlatformRoleAssignment[]
+
+  knowledgeBases   KnowledgeBase[]
+  documentsCreated Document[]
+  conversations    Conversation[]
+  messageFeedback  MessageFeedback[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
