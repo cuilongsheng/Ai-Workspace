@@ -223,7 +223,7 @@ RAG evaluation results apply only to the repository's V1 evaluation set and the 
 
 ## V1.0.0 Scope and Boundaries
 
-- The project uses a modular monolith rather than artificial microservices.
+- The project uses a modular monolith.
 - Transaction data, pgvector, and BM25 share one database to reduce ETL and consistency overhead.
 - Queue workers isolate slow document-processing tasks, but production-grade dead-letter queues, worker observability, and multi-worker load testing remain future work.
 - Refresh tokens use HttpOnly cookies, while access tokens are held in frontend memory. Production deployment should use HTTPS and a same-site domain strategy.
