@@ -72,7 +72,6 @@ export function LoginPage() {
             id="account"
             type="text"
             autoComplete="username"
-            defaultValue="admin"
             className={`h-9 rounded-md border bg-white px-3 text-sm font-normal text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 ${errors.account ? 'border-rose-500' : 'border-slate-200'}`}
             aria-invalid={Boolean(errors.account)}
             {...register('account')}
@@ -94,7 +93,6 @@ export function LoginPage() {
               id="password"
               type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
-              defaultValue="123456"
               className={`h-9 w-full rounded-md border bg-white px-3 pr-10 text-sm font-normal text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 ${passwordError ? 'border-rose-500' : 'border-slate-200'}`}
               aria-invalid={Boolean(passwordError)}
               {...register('password')}

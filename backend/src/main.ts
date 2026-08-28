@@ -8,8 +8,6 @@ import { LocalizedExceptionFilter } from './i18n/localized-exception.filter';
 import { resolveLocale } from './i18n/localize-message';
 
 async function bootstrap() {
-  validateEnv();
-
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
   app.use((request, response, next) => {
@@ -60,25 +58,3 @@ async function bootstrap() {
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
-
-function validateEnv() {
-  const requiredKeys = [
-    'DATABASE_URL',
-    'REDIS_URL',
-    'JWT_SECRET',
-    'JWT_REFRESH_SECRET',
-  ];
-  const missingKeys = requiredKeys.filter((key) => !process.env[key]);
-
-  if (missingKeys.length) {
-    throw new Error(`Missing required env: ${missingKeys.join(', ')}`);
-  }
-
-  if ((process.env.JWT_SECRET?.length ?? 0) < 16) {
-    throw new Error('JWT_SECRET must be at least 16 characters');
-  }
-
-  if ((process.env.JWT_REFRESH_SECRET?.length ?? 0) < 16) {
-    throw new Error('JWT_REFRESH_SECRET must be at least 16 characters');
-  }
-}

@@ -206,8 +206,7 @@ const DEPARTMENT_ADMIN_PERMISSION_CODES = [
 ] as const;
 
 function getRequiredSeedValue(
-  key: 'SEED_ADMIN_EMAIL' | 'SEED_ADMIN_PASSWORD',
-  developmentFallback: string,
+  key: 'SEED_ADMIN_EMAIL' | 'SEED_ADMIN_USERNAME' | 'SEED_ADMIN_PASSWORD',
 ): string {
   const configuredValue = process.env[key]?.trim();
 
@@ -215,11 +214,7 @@ function getRequiredSeedValue(
     return configuredValue;
   }
 
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error(`${key} must be configured in production.`);
-  }
-
-  return developmentFallback;
+  throw new Error(`${key} must be configured before running the seed.`);
 }
 
 async function main(): Promise<void> {
@@ -228,13 +223,9 @@ async function main(): Promise<void> {
   const organizationName =
     process.env.SEED_ORGANIZATION_NAME?.trim() || 'XX科技有限公司';
 
-  const adminPassword = getRequiredSeedValue('SEED_ADMIN_PASSWORD', '123456');
-
-  if (process.env.NODE_ENV === 'production' && adminPassword === '123456') {
-    throw new Error(
-      'SEED_ADMIN_PASSWORD must not use the development password in production.',
-    );
-  }
+  const adminEmail = getRequiredSeedValue('SEED_ADMIN_EMAIL');
+  const adminUsername = getRequiredSeedValue('SEED_ADMIN_USERNAME');
+  const adminPassword = getRequiredSeedValue('SEED_ADMIN_PASSWORD');
 
   const passwordHash = await argon2.hash(adminPassword, {
     type: argon2.argon2id,
@@ -470,15 +461,15 @@ async function main(): Promise<void> {
       update: {
         organizationId: null,
         organizationRole: null,
-        email: 'admin@ai-workspace.local',
-        username: 'admin',
+        email: adminEmail,
+        username: adminUsername,
         passwordHash,
         status: 'ACTIVE',
       },
       create: {
         id: SEED_IDS.users.admin,
-        email: 'admin@ai-workspace.local',
-        username: 'admin',
+        email: adminEmail,
+        username: adminUsername,
         passwordHash,
         status: 'ACTIVE',
       },

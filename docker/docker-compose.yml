@@ -4,9 +4,9 @@ services:
     container_name: ai-workspace-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: ai_workspace
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in docker/.env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in docker/.env}
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB in docker/.env}
     ports:
       - "5434:5432"
     volumes:
@@ -16,9 +16,9 @@ services:
     container_name: ai-workspace-search-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: ai_workspace
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in docker/.env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in docker/.env}
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB in docker/.env}
     ports:
       - "5435:5432"
     volumes:
@@ -41,8 +41,8 @@ services:
       - "9000:9000"
       - "9001:9001"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin123
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Set MINIO_ROOT_USER in docker/.env}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD in docker/.env}
     volumes:
       - ./minio/data:/data
     command:

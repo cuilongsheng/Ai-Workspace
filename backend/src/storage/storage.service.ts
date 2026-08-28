@@ -1,18 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { Client } from 'minio';
 import { Readable } from 'stream';
+import { resolveStorageConfig } from './storage.config';
 
 @Injectable()
 export class StorageService {
-  private client = new Client({
-    endPoint: 'localhost',
-    port: 9000,
-    useSSL: false,
-    accessKey: 'minioadmin',
-    secretKey: 'minioadmin123',
-  });
+  private readonly client: Client;
+  private readonly bucket: string;
 
-  private bucket = 'ai-workspace';
+  constructor() {
+    const config = resolveStorageConfig();
+    this.client = new Client({
+      endPoint: config.endPoint,
+      port: config.port,
+      useSSL: config.useSSL,
+      accessKey: config.accessKey,
+      secretKey: config.secretKey,
+    });
+    this.bucket = config.bucket;
+  }
 
   async uploadFile(key: string, buffer: Buffer, mimeType: string) {
     await this.client.putObject(this.bucket, key, buffer, buffer.length, {

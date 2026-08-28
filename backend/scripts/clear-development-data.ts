@@ -1,18 +1,39 @@
 import { Queue } from 'bullmq';
 import { Client as MinioClient } from 'minio';
 import { PrismaService } from '../src/prisma/prisma.service';
+import { resolveStorageConfig } from '../src/storage/storage.config';
+
+function requireEnv(key: string): string {
+  const value = process.env[key]?.trim();
+  if (!value) throw new Error(`${key} is not configured`);
+  return value;
+}
 
 async function main() {
+  const storageConfig = resolveStorageConfig();
+  const redisUrl = new URL(requireEnv('REDIS_URL'));
+  const redisDatabase = redisUrl.pathname.slice(1);
   const prisma = new PrismaService();
   const queue = new Queue('document-processing', {
-    connection: { host: 'localhost', port: 6379 },
+    connection: {
+      host: redisUrl.hostname,
+      port: Number(redisUrl.port || 6379),
+      username: redisUrl.username
+        ? decodeURIComponent(redisUrl.username)
+        : undefined,
+      password: redisUrl.password
+        ? decodeURIComponent(redisUrl.password)
+        : undefined,
+      db: redisDatabase ? Number(redisDatabase) : undefined,
+      tls: redisUrl.protocol === 'rediss:' ? {} : undefined,
+    },
   });
   const storage = new MinioClient({
-    endPoint: 'localhost',
-    port: 9000,
-    useSSL: false,
-    accessKey: 'minioadmin',
-    secretKey: 'minioadmin123',
+    endPoint: storageConfig.endPoint,
+    port: storageConfig.port,
+    useSSL: storageConfig.useSSL,
+    accessKey: storageConfig.accessKey,
+    secretKey: storageConfig.secretKey,
   });
 
   await prisma.$connect();
@@ -69,7 +90,7 @@ async function main() {
 
     if (documents.length) {
       await storage.removeObjects(
-        'ai-workspace',
+        storageConfig.bucket,
         documents.map((document) => document.storageKey),
       );
     }
