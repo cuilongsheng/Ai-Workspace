@@ -6,9 +6,7 @@
 
 **Current version: v1.0.0**
 
-AI Knowledge Workspace is an end-to-end implementation of a realistic B2B AI knowledge product rather than a standalone chat demo. It models platform, organization, and department scopes; processes enterprise documents asynchronously; retrieves published knowledge through hybrid search; and streams grounded answers with traceable citations.
-
-The project is positioned as a **frontend-focused full-stack implementation**. Its strongest areas are React application architecture, role-aware product workflows, API integration, and the complete RAG user journey. The backend is implemented with NestJS and Prisma, without claiming production scale or distributed-system capabilities that have not been proven.
+AI Knowledge Workspace delivers a complete business closed‑loop for enterprise knowledge products. The system covers three scopes: platform, organization and department. It processes enterprise documents asynchronously, recalls published knowledge via hybrid retrieval, and streams well‑grounded, traceably‑cited answers to the browser. Key highlights include the React application architecture, role‑driven product workflows, frontend‑backend API collaboration, and the full end‑to‑end RAG user journey. The backend is implemented with NestJS and Prisma, though production‑scale performance and distributed capabilities are not acceptance criteria for this project.
 
 ## Highlights
 
