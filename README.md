@@ -39,12 +39,12 @@ Organization / Department / Role authorization
 
 ## Roles and Access
 
-| Role | Scope | Main capabilities |
-| --- | --- | --- |
-| Platform Admin | Platform | Dashboard, organization creation and management, platform statistics |
-| Organization Admin | Organization | Department management, employee management, department role assignment |
-| Department Admin | Department | Members, knowledge bases, documents, chunks, review, publishing, retrieval diagnostics, and chat |
-| Department Member | Department | Read-only knowledge access, knowledge-base chat, conversations, and feedback |
+| Role               | Scope        | Main capabilities                                                                                |
+| ------------------ | ------------ | ------------------------------------------------------------------------------------------------ |
+| Platform Admin     | Platform     | Dashboard, organization creation and management, platform statistics                             |
+| Organization Admin | Organization | Department management, employee management, department role assignment                           |
+| Department Admin   | Department   | Members, knowledge bases, documents, chunks, review, publishing, retrieval diagnostics, and chat |
+| Department Member  | Department   | Read-only knowledge access, knowledge-base chat, conversations, and feedback                     |
 
 Authorization is enforced at three levels:
 
@@ -52,6 +52,27 @@ Authorization is enforced at three levels:
 2. React Router protection against direct URL access.
 3. NestJS guards and resource ownership checks at the API layer.
 
+## Screenshots
+
+### Flow
+
+<img src="./screenshots/rag-flow.png" alt="Rag Flow" width="1200" />
+
+### Tenant Manage
+
+<img src="./screenshots/enterprise-admin.png" alt="Tenant manage" width="900" />
+
+### Knowledge Base Manage document
+
+<img src="./screenshots/publish-document.png" alt="Knowledge Base" width="900" />
+
+### Document Review
+
+<img src="./screenshots/review-chunks.png" alt="Review Chunks" width="900" />
+
+### AI Chat with Citations
+
+<img src="./screenshots/chat.png" alt="AI Chat with Citations" width="900" />
 ## Document Workflow
 
 ```text
@@ -96,19 +117,19 @@ UPLOAD → PROCESSING → PARSED → REVIEWING → PUBLISHED
 
 ## Technology Stack
 
-| Layer | Technology |
-| --- | --- |
-| Frontend | React 19, TypeScript, Vite 8, React Router, Zustand, Axios |
-| UI | HeroUI, Tailwind CSS 4, Framer Motion, Lucide, React Markdown, KaTeX |
-| Forms and validation | React Hook Form, Zod |
-| Internationalization | i18next, react-i18next |
-| Backend | Node.js, NestJS 11, REST, SSE, class-validator, Swagger / Scalar |
-| Authentication | JWT access token, HttpOnly refresh cookie, Redis session, RBAC guards |
-| Database and search | PostgreSQL / ParadeDB, Prisma 7, pgvector, `pg_search` BM25 |
-| Jobs and storage | BullMQ, Redis, MinIO |
-| RAG | Ollama embeddings, vector search, BM25, RRF, Qwen reranker, citations, RAG traces |
-| Quality | Vitest, Testing Library, Playwright, Jest, Supertest, ESLint, Prettier |
-| Local infrastructure | Docker Compose |
+| Layer                | Technology                                                                        |
+| -------------------- | --------------------------------------------------------------------------------- |
+| Frontend             | React 19, TypeScript, Vite 8, React Router, Zustand, Axios                        |
+| UI                   | HeroUI, Tailwind CSS 4, Framer Motion, Lucide, React Markdown, KaTeX              |
+| Forms and validation | React Hook Form, Zod                                                              |
+| Internationalization | i18next, react-i18next                                                            |
+| Backend              | Node.js, NestJS 11, REST, SSE, class-validator, Swagger / Scalar                  |
+| Authentication       | JWT access token, HttpOnly refresh cookie, Redis session, RBAC guards             |
+| Database and search  | PostgreSQL / ParadeDB, Prisma 7, pgvector, `pg_search` BM25                       |
+| Jobs and storage     | BullMQ, Redis, MinIO                                                              |
+| RAG                  | Ollama embeddings, vector search, BM25, RRF, Qwen reranker, citations, RAG traces |
+| Quality              | Vitest, Testing Library, Playwright, Jest, Supertest, ESLint, Prettier            |
+| Local infrastructure | Docker Compose                                                                    |
 
 ## Repository Structure
 
@@ -139,12 +160,12 @@ cd docker
 docker compose up -d postgres-search redis minio
 ```
 
-| Service | Default address |
-| --- | --- |
-| ParadeDB / PostgreSQL | `localhost:5435` |
-| Redis | `localhost:6379` |
-| MinIO API | `localhost:9000` |
-| MinIO Console | `http://localhost:9001` |
+| Service               | Default address         |
+| --------------------- | ----------------------- |
+| ParadeDB / PostgreSQL | `localhost:5435`        |
+| Redis                 | `localhost:6379`        |
+| MinIO API             | `localhost:9000`        |
+| MinIO Console         | `http://localhost:9001` |
 
 The full BM25 migration requires the `pg_search` extension supplied by `postgres-search`, so the project uses port `5435` by default.
 

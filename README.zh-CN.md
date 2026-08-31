@@ -6,7 +6,7 @@
 
 **当前版本：v1.0.0**
 
-AI Knowledge Workspace是对企业知识产品完整业务闭环的实现。系统覆盖平台、组织和部门三个作用域，可以异步处理企业文档，通过混合检索召回已发布知识，并将有依据、可追溯引用的回答流式传输到浏览器。
+AI Knowledge Workspace 是对企业知识产品完整业务闭环的实现。系统覆盖平台、组织和部门三个作用域，可以异步处理企业文档，通过混合检索召回已发布知识，并将有依据、可追溯引用的回答流式传输到浏览器。
 重点展示 React 应用架构、角色驱动的产品流程、前后端接口协作和完整的 RAG 用户链路。后端使用 NestJS 与 Prisma 实现，但不把生产规模或分布式能力作为此项目验收成果。
 
 ## 项目亮点
@@ -40,18 +40,40 @@ SSE 流式回答 + Citation + 反馈追踪
 
 ## 角色与权限
 
-| 角色 | 作用域 | 主要能力 |
-| --- | --- | --- |
-| Platform Admin | 平台 | Dashboard、租户创建与管理、平台统计 |
-| Organization Admin | 组织 | 部门管理、租户员工管理、部门角色分配 |
-| Department Admin | 部门 | 成员、知识库、文档、Chunk、审核、发布、检索诊断和聊天 |
-| Department Member | 部门 | 只读知识访问、知识库 AI Chat、会话与反馈 |
+| 角色               | 作用域 | 主要能力                                              |
+| ------------------ | ------ | ----------------------------------------------------- |
+| Platform Admin     | 平台   | Dashboard、租户创建与管理、平台统计                   |
+| Organization Admin | 组织   | 部门管理、租户员工管理、部门角色分配                  |
+| Department Admin   | 部门   | 成员、知识库、文档、Chunk、审核、发布、检索诊断和聊天 |
+| Department Member  | 部门   | 只读知识访问、知识库 AI Chat、会话与反馈              |
 
 权限同时落在三层：
 
 1. 左侧导航根据角色显示。
 2. React Router 阻止直接访问无权限 URL。
 3. NestJS Guard 和资源归属校验保护 API 与真实数据边界。
+
+## Screenshots
+
+### Flow
+
+<img src="./screenshots/rag-flow.png" alt="Rag Flow" width="1200" />
+
+### Tenant Manage
+
+<img src="./screenshots/enterprise-admin.png" alt="Tenant manage" width="900" />
+
+### Knowledge Base Manage document
+
+<img src="./screenshots/publish-document.png" alt="Knowledge Base" width="900" />
+
+### Document Review
+
+<img src="./screenshots/review-chunks.png" alt="Review Chunks" width="900" />
+
+### AI Chat with Citations
+
+<img src="./screenshots/chat.png" alt="AI Chat with Citations" width="900" />
 
 ## 文档工作流
 
@@ -97,19 +119,19 @@ UPLOAD → PROCESSING → PARSED → REVIEWING → PUBLISHED
 
 ## 技术栈
 
-| 层级 | 技术 |
-| --- | --- |
-| Frontend | React 19、TypeScript、Vite 8、React Router、Zustand、Axios |
-| UI | HeroUI、Tailwind CSS 4、Framer Motion、Lucide、React Markdown、KaTeX |
-| 表单与校验 | React Hook Form、Zod |
-| 国际化 | i18next、react-i18next |
-| Backend | Node.js、NestJS 11、REST、SSE、class-validator、Swagger / Scalar |
-| 认证与授权 | JWT Access Token、HttpOnly Refresh Cookie、Redis Session、RBAC Guard |
-| 数据库与搜索 | PostgreSQL / ParadeDB、Prisma 7、pgvector、`pg_search` BM25 |
-| 异步任务与存储 | BullMQ、Redis、MinIO |
-| RAG | Ollama Embedding、Vector Search、BM25、RRF、Qwen Reranker、Citation、RAG Trace |
-| 质量保障 | Vitest、Testing Library、Playwright、Jest、Supertest、ESLint、Prettier |
-| 本地基础设施 | Docker Compose |
+| 层级           | 技术                                                                           |
+| -------------- | ------------------------------------------------------------------------------ |
+| Frontend       | React 19、TypeScript、Vite 8、React Router、Zustand、Axios                     |
+| UI             | HeroUI、Tailwind CSS 4、Framer Motion、Lucide、React Markdown、KaTeX           |
+| 表单与校验     | React Hook Form、Zod                                                           |
+| 国际化         | i18next、react-i18next                                                         |
+| Backend        | Node.js、NestJS 11、REST、SSE、class-validator、Swagger / Scalar               |
+| 认证与授权     | JWT Access Token、HttpOnly Refresh Cookie、Redis Session、RBAC Guard           |
+| 数据库与搜索   | PostgreSQL / ParadeDB、Prisma 7、pgvector、`pg_search` BM25                    |
+| 异步任务与存储 | BullMQ、Redis、MinIO                                                           |
+| RAG            | Ollama Embedding、Vector Search、BM25、RRF、Qwen Reranker、Citation、RAG Trace |
+| 质量保障       | Vitest、Testing Library、Playwright、Jest、Supertest、ESLint、Prettier         |
+| 本地基础设施   | Docker Compose                                                                 |
 
 ## 仓库结构
 
@@ -140,12 +162,12 @@ cd docker
 docker compose up -d postgres-search redis minio
 ```
 
-| 服务 | 默认地址 |
-| --- | --- |
-| ParadeDB / PostgreSQL | `localhost:5435` |
-| Redis | `localhost:6379` |
-| MinIO API | `localhost:9000` |
-| MinIO Console | `http://localhost:9001` |
+| 服务                  | 默认地址                |
+| --------------------- | ----------------------- |
+| ParadeDB / PostgreSQL | `localhost:5435`        |
+| Redis                 | `localhost:6379`        |
+| MinIO API             | `localhost:9000`        |
+| MinIO Console         | `http://localhost:9001` |
 
 完整 BM25 迁移需要 `postgres-search` 提供的 `pg_search` 扩展，因此项目默认使用 `5435` 端口。
 

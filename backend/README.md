@@ -1,5 +1,3 @@
-
-
 ## Project setup
 
 ```bash
@@ -38,6 +36,7 @@ $ pnpm run test:cov
 $ pnpm install -g @nestjs/mau
 $ mau deploy
 ```
+
 ## Offen Bash
 
 ```bash
